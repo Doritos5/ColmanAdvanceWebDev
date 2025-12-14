@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const postRoutes = require('./routes/post_route')
+const postRoutes = require('./routes/postRoute')
+const commentRoutes = require('./routes/commentRoutes')
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ mongoose
 
 // ---------- Routes ----------
 app.use('/post', postRoutes);
+app.use('/comment', commentRoutes);
 
 // ---------- Error Handler ----------
 app.use((err, req, res, next) => {

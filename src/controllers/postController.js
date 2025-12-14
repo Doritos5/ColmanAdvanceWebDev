@@ -1,4 +1,5 @@
-const Post = require('../models/post_model');
+const Post = require('../models/postModel');
+const Comment = require('../models/commentModel');
 
 const getAllPosts = async (req, res) => {
     const filter = req.query.sender ? { sender: req.query.sender } : {}; // Filter by sender if provided
@@ -50,9 +51,28 @@ const updatePost = async (req, res) => {
     }
 };
 
+// Delete a post and all related comments
+const deletePost = async (req, res) => {
+    const id = req.params.id;
+    try {
+        const post = await Post.findByIdAndDelete(id);
+        if (!post) {
+            return res.status(404).send("Post not found");
+        }
+
+        // Delete all comments related to this post
+        await Comment.deleteMany({ postId: id });
+
+        res.json({ message: 'Post and related comments deleted successfully' });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
+};
+
 module.exports = {
     getAllPosts,
     getPostById,
     createPost,
-    updatePost
+    updatePost,
+    deletePost
 };
