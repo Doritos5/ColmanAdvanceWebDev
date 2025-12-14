@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const postRoutes = require('./routes/post_route')
+
 dotenv.config();
 
 const app = express();
@@ -23,7 +25,7 @@ mongoose
     });
 
 // ---------- Routes ----------
-// Here Niros will add the posts and i will add the comments
+app.use('/post', postRoutes);
 
 // ---------- Error Handler ----------
 app.use((err, req, res, next) => {
