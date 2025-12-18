@@ -1,27 +1,90 @@
+@base_url = http://localhost:5551
+
+
 ### 1. Add a New Post
-POST http://localhost:5555/post
+POST {{base_url}}/post
 Content-Type: application/json
 
 {
-    "title": "My First Post",
-    "content": "This is the content of my first post via REST API",
-    "sender": "Donald"
+  "title": "My First Post",
+  "content": "This is the content of my first post via REST API",
+  "sender": "Donald"
 }
+> {% client.global.set("post_id", response.body._id) %}
+
+
 
 ### 2. Get All Posts
-GET http://localhost:5555/post
+GET {{base_url}}/post
 
 ### 3. Get Post by ID
-GET http://localhost:5555/post/693b302b20cfef4215455a3f
+GET {{base_url}}/post/{{post_id}}
 
 ### 4. Get Posts by Sender
-GET http://localhost:5555/post?sender=Donald
+GET {{base_url}}/post?sender=Donald
 
 ### 5. Update a Post
-PUT http://localhost:5555/post/693b302b20cfef4215455a3f
+PUT {{base_url}}/post/{{post_id}}
 Content-Type: application/json
 
 {
     "title": "Updated Title",
     "content": "This content has been updated!"
 }
+
+### ------------------------- Comments -------------------------
+
+### Create a new comment
+POST {{base_url}}/comment
+Content-Type: application/json
+
+{
+  "postId": "{{post_id}}",
+  "senderId": "user123",
+  "content": "This is a test comment2"
+}
+> {% client.global.set("comment_id", response.body._id) %}
+
+###
+
+### Get all comments
+GET {{base_url}}/comment
+
+###
+
+### Get a single comment by ID
+GET {{base_url}}/comment/{{comment_id}}
+
+###
+
+### Update a comment
+PUT {{base_url}}/comment/{{comment_id}}
+Content-Type: application/json
+
+{
+  "content": "Updated comment content",
+  "postId": "{{post_id}}",
+  "senderId": "user1233"
+}
+
+###
+
+### Delete a comment
+DELETE {{base_url}}/comment/{{comment_id}}
+Content-Type: application/json
+
+{
+  "senderId": "user123"
+}
+
+###
+
+### Get all comments for a specific post
+GET {{base_url}}/comment/post/{{post_id}}
+
+###
+
+### Delete a post (and its related comments)
+DELETE {{base_url}}/post/{{post_id}}
+
+###
