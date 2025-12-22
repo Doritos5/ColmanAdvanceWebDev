@@ -10,7 +10,7 @@
     "test": "tsc && jest --runInBand --detectOpenHandles --forceExit",
     "------------------------- NIR SUPPORT TESTS HERE BELOW -------------------------": ".",
     "testcomment": "tsc && jest --runInBand --detectOpenHandles --forceExit src/tests/comments.test.ts",
-    "testmovie": "tsc && jest --runInBand --detectOpenHandles --forceExit src/tests/movies.test.ts",
+    "testpost": "tsc && jest --runInBand --detectOpenHandles --forceExit src/tests/posts.test.ts",
     "testauth": "tsc && jest --runInBand --detectOpenHandles --forceExit src/tests/auth.test.ts"
   },
   "keywords": [],

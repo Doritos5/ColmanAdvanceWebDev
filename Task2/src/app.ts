@@ -18,7 +18,7 @@ const intApp = () => {
         app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs, {
             explorer: true,
             customCss: ".swagger-ui .topbar { display: none }",
-            customSiteTitle: "Movie & Comments API Documentation"
+            customSiteTitle: "Posts & Comments API Documentation"
         }));
 
         // Swagger JSON endpoint
