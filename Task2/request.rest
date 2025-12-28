@@ -1,90 +1,86 @@
-@base_url = http://localhost:5552
-
-
-### 1. Add a New Post
-POST {{base_url}}/post
-Content-Type: application/json
-
-{
-  "title": "My First Post",
-  "content": "This is the content of my first post via REST API",
-  "senderId": "Donald"
-}
-> {% client.global.set("post_id", response.body._id) %}
-
-
-
-### 2. Get All Posts
-GET {{base_url}}/post
-
-### 3. Get Post by ID
-GET {{base_url}}/post/{{post_id}}
-
-### 4. Get Posts by Sender
-GET {{base_url}}/post?sender=Donald
-
-### 5. Update a Post
-PUT {{base_url}}/post/{{post_id}}
-Content-Type: application/json
-
-{
-    "title": "Updated Title",
-    "content": "This content has been updated!"
-}
-
-### ------------------------- Comments -------------------------
-
-### Create a new comment
-POST {{base_url}}/comment
-Content-Type: application/json
-
-{
-  "postId": "{{post_id}}",
-  "senderId": "user123",
-  "content": "This is a test comment2"
-}
-> {% client.global.set("comment_id", response.body._id) %}
+@baseUrl = http://localhost:5552
 
 ###
-
-### Get all comments
-GET {{base_url}}/comment
-
-###
-
-### Get a single comment by ID
-GET {{base_url}}/comment/{{comment_id}}
-
-###
-
-### Update a comment
-PUT {{base_url}}/comment/{{comment_id}}
+### Register a new user
+# @name register
+POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "content": "Updated comment content",
-  "postId": "{{post_id}}",
-  "senderId": "user1233"
+    "email": "auto_test_1@example.com",
+    "password": "Password123!",
+    "imgUrl": "http://example.com/image.png"
+}
+
+### 2. Login User
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "auto_test_1@example.com",
+    "password": "Password123!"
 }
 
 ###
 
-### Delete a comment
-DELETE {{base_url}}/comment/{{comment_id}}
+### Get User Profile
+
+GET {{baseUrl}}/users/{{login.response.body._id}}
+Authorization: Bearer {{login.response.body.accessToken}}
+
+###
+
+### Update User Profile
+
+PUT {{baseUrl}}/users/{{login.response.body._id}}
 Content-Type: application/json
+Authorization: Bearer {{login.response.body.accessToken}}
 
 {
-  "senderId": "user123"
+    "imgUrl": "http://example.com/new-image.png"
+}
+
+### 
+
+### Create a New Post
+
+# @name createPost
+POST {{baseUrl}}/post
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.accessToken}}
+
+{
+    "title": "My TypeScript Post",
+    "content": "This is a post created via REST Client with JWT Auth"
+}
+###
+
+### Get All Posts
+GET {{baseUrl}}/post
+
+###
+
+### Get Post by ID
+
+GET {{baseUrl}}/post/{{createPost.response.body._id}}
+
+###
+
+### Update Post
+
+PUT {{baseUrl}}/post/{{createPost.response.body._id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.accessToken}}
+
+{
+    "title": "Updated Title via REST",
+    "content": "Updated content via REST"
 }
 
 ###
 
-### Get all comments for a specific post
-GET {{base_url}}/comment/post/{{post_id}}
+### Delete Post
 
-###
-
-### Delete a post (and its related comments)
-DELETE {{base_url}}/post/{{post_id}}
-
-###
+DELETE {{baseUrl}}/post/{{createPost.response.body._id}}
+Authorization: Bearer {{login.response.body.accessToken}}

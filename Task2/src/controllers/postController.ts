@@ -26,22 +26,29 @@ class PostController extends baseController {
     }
 
     async del(req: AuthRequest, res: Response) {
-        const userId = (req as any).user?._id;
-        const post = await Post.findById(req.params.id);
-        if (post?.senderId.toString() !== userId) {
-            res.status(403).json({error: "Forbidden"});
-            return;
-        }
+        const userId = req.user ? req.user._id : null;
+        const postId = req.params.id;
 
-        if (post) {
+        try {
+            const post = await Post.findById(postId);
+            if (!post) {
+                res.status(404).json({ error: "Post not found" });
+                return;
+            }
+            
+            if (post?.senderId.toString() !== userId) {
+                res.status(403).json({error: "Forbidden"});
+                return;
+            }
+
             // Delete all comments associated with the post
             await Comment.deleteMany({ postId: post._id });
 
             // Call parent deletion method
             return super.del(req, res);
-        }
-        else{
-            res.status(404).json({ error: "Post not found" });
+
+        } catch (error) {
+            res.status(500).json({ error: "Internal Server Error" });
         }
     }
 

@@ -1,7 +1,11 @@
-import express from "express";
-const router = express.Router();
-import authController from "../controllers/authController";
-
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const router = express_1.default.Router();
+const authController_1 = __importDefault(require("../controllers/authController"));
 /**
  * @swagger
  * /auth/register:
@@ -39,8 +43,7 @@ import authController from "../controllers/authController";
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/register", authController.register);
-
+router.post("/register", authController_1.default.register);
 /**
  * @swagger
  * /auth/login:
@@ -78,8 +81,7 @@ router.post("/register", authController.register);
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/login", authController.login);
-
+router.post("/login", authController_1.default.login);
 /**
  * @swagger
  * /auth/refresh-token:
@@ -114,11 +116,9 @@ router.post("/login", authController.login);
  *         $ref: '#/components/responses/UnauthorizedError'
  *       400:
  *         $ref: '#/components/responses/ValidationError'
- *       403:
- *         $ref: '#/components/responses/ForbiddenError'
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-router.post("/refresh-token", authController.refreshToken);
-
-export default router;
+router.post("/refresh-token", authController_1.default.refreshToken);
+exports.default = router;
+//# sourceMappingURL=authRoutes.js.map
