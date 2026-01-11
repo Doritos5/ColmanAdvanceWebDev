@@ -50,8 +50,10 @@ class BaseController {
     async del(req: Request, res: Response) {
         const id = req.params.id;
         try {
-            const response = await this.model.findByIdAndDelete(id);
-            res.send(response);
+            // const response = await this.model.findByIdAndDelete(id);
+            //res.send(response);
+            await this.model.findByIdAndDelete(id);
+            res.status(204).send();
         } catch (error) {
             res.status(500).json({ error: error instanceof Error ? error.message : 'An unknown error occurred' });
         }

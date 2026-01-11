@@ -1,6 +1,7 @@
-/** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 export default {
-  preset: "ts-jest",
-  testEnvironment: "node",
-  roots: ["<rootDir>/src"],
+    preset: "ts-jest",
+    testEnvironment: "node",
+    testMatch: ["**/?(*.)+(spec|test).ts"], // מחפש קבצים שמסתיימים ב-.test.ts
+    moduleFileExtensions: ["ts", "js", "json", "node"],
 };

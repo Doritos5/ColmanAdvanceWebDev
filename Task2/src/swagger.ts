@@ -33,9 +33,23 @@ const options: swaggerJsdoc.Options = {
             }
         ],
         servers: [
-            {
-                url: `http://localhost:${port}`,
+            {                
+                url: process.env.BASE_URL || "http://localhost:3000",
                 description: "Development server",
+            },
+        ],
+        tags: [
+            {
+                name: "Authentication",
+                description: "User authentication endpoints",
+            },
+            {
+                name: "Posts",
+                description: "Endpoints for managing posts",
+            },
+            {
+                name: "Comments",
+                description: "Endpoints for managing comments",
             },
         ],
         components: {
@@ -83,30 +97,30 @@ const options: swaggerJsdoc.Options = {
                         title: {
                             type: "string",
                             description: "Title of the post",
-                            example: "My First Blog Post",
+                            example: "My First Post",
                         },
                         content: {
                             type: "string",
                             description: "Content of the post",
-                            example: "This is the content of the post...",
+                            example: "This is the content of my first post.",
                         },
                         senderId: {
                             type: "string",
-                            description: "The ID of the user who created the post",
-                            example: "60d0fe4f5311236168a109ca",
+                            description: "ID of the user who wrote this post",
+                            example: "507f1f77bcf86cd799439011",
                         },
                     },
                 },
                 Comment: {
                     type: "object",
-                    required: ["message", "postId", "writerId"],
+                    required: ["content", "postId", "senderId"],
                     properties: {
                         _id: {
                             type: "string",
                             description: "Comment unique identifier",
                             example: "507f1f77bcf86cd799439011",
                         },
-                        message: {
+                        content: {
                             type: "string",
                             description: "Comment message content",
                             example: "Great post! Loved the special effects.",
@@ -116,7 +130,7 @@ const options: swaggerJsdoc.Options = {
                             description: "ID of the post this comment belongs to",
                             example: "507f1f77bcf86cd799439011",
                         },
-                        writerId: {
+                        senderId: {
                             type: "string",
                             description: "ID of the user who wrote this comment",
                             example: "507f1f77bcf86cd799439011",

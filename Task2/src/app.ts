@@ -1,15 +1,19 @@
 import express, { Express } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cors from "cors";
+dotenv.config();
 import postRoutes from "./routes/postRoute";
 import commentRoutes from "./routes/commentRoutes";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import { specs, swaggerUi } from "./swagger";
 
-const app = express();
-dotenv.config();
-console.log("doritos: ", process.env.NODE_ENV);
+const initApp = () => {
+    const promise = new Promise<Express>((resolve, reject) => {
+        app.use(express.urlencoded({ extended: false }));
+        app.use(express.json());
+        app.use(cors());
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -27,14 +31,13 @@ app.get("/api-docs.json", (req, res) => {
     res.send(specs);
 });
 
-// Routes
-app.use("/comment", commentRoutes);
-app.use("/post", postRoutes);
-app.use("/auth", authRoutes);
-app.use("/users", userRoutes);
-
-const initApp = (): Promise<Express> => {
-    return new Promise<Express>((resolve, reject) => {
+        // Middleware לטיפול בשגיאות - ידפיס את הבעיה האמיתית לטרמינל
+        app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+            console.error("🔥 Server Error:", err); // זה ידפיס את השגיאה באדום/בולט
+            res.status(500).json({ error: "Internal Server Error", details: err.message });
+        });
+        // ------------------------------------------------------------------------
+        
         const dbUri = process.env.MONGODB_URI;
 
         if (!dbUri) {
@@ -43,15 +46,18 @@ const initApp = (): Promise<Express> => {
         } else {
             mongoose.connect(dbUri, {})
                 .then(() => {
-                    console.log("Connected to MongoDB");
-                    resolve(app); // returns app
+                    console.log("Successfully connected to MongoDB");
+                    resolve(app);
                 })
                 .catch((err) => {
+                    console.error("🔥🔥🔥 Database Connection Error 🔥🔥🔥");
+                    console.error("Could not connect to MongoDB. Please ensure MongoDB is running.");
+                    console.error("Connection string:", dbUri);
+                    console.error(err);
                     reject(err);
                 });
         }
     });
 };
 
-export default app; // Default export of the app instance for testing
-export { initApp }; // Named export of initApp function for server startup
+export default initApp;

@@ -1,6 +1,6 @@
 import express from 'express';
 import postController from '../controllers/postController';
-import authMiddleware from "../middleware/authMiddleware";
+import authMiddleware from '../middleware/authMiddleware';
 
 const router = express.Router();
 
@@ -46,7 +46,7 @@ const router = express.Router();
  *       403:
  *         description: Forbidden (Token valid but user not authorized)
  */
-router.post("/", authMiddleware, postController.post.bind(postController));
+router.post('/', authMiddleware, postController.post.bind(postController));
 
 /**
  * @swagger
@@ -175,6 +175,6 @@ router.delete('/:id', authMiddleware, postController.del.bind(postController));
  *       404:
  *         description: Post not found
  */
-router.get('/comments/:postId', postController.getCommentsByPostId.bind(postController));
+router.get('/comments/:postId', authMiddleware, postController.getCommentsByPostId.bind(postController));
 
 export default router;

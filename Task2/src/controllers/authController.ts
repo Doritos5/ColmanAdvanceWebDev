@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import User, { IUser } from "../models/userModel";
+import User from "../models/userModel";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -17,14 +17,14 @@ const generateToken = (userId: string): Tokens => {
     const refreshSecret: string = process.env.JWT_REFRESH_SECRET || "refreshsecret";
     const exp: number = parseInt(process.env.JWT_EXPIRES_IN || "3600"); // 1 hour
     const refreshexp: number = parseInt(process.env.JWT_REFRESH_EXPIRES_IN || "86400"); // 24 hours
-    const accessToken = jwt.sign(
+    const token = jwt.sign(
         { _id: userId },
         secret,
         { expiresIn: exp }
     );
     const refreshToken = jwt.sign(
         { _id: userId },
-        refreshSecret,
+        secret,
         { expiresIn: refreshexp } // 24 hours
     );
     return { accessToken, refreshToken };
@@ -44,20 +44,21 @@ const register = async (req: Request, res: Response) => {
 
         const salt = await bcrypt.genSalt(10);
         const encryptedPassword = await bcrypt.hash(password, salt);
+        const user = await User.create({ email, password: encryptedPassword });
 
-        const newUser = new User({
-            email,
-            password: encryptedPassword,
-            // If you have imgUrl in your user model, add it here. If not, remove it.
+        //generate JWT token
+        // const secret: string = process.env.JWT_SECRET || "secretkey";
+        // const exp: number = parseInt(process.env.JWT_EXPIRES_IN || "3600"); // 1 hour
+        const tokens = generateToken(user._id.toString());
+        user.refreshToken.push(tokens.refreshToken);
+        await user.save();
+
+        //send token back to user
+        res.status(201).json({
+            _id: user._id,
+            email: user.email
         });
 
-        const savedUser = await newUser.save();
-        // return the user id to confirm creation.
-        res.status(201).json({ 
-            _id: savedUser._id, 
-            email: savedUser.email,
-            message: "User registered successfully" 
-        });
     } catch (error) {
         console.error("Registration error:", error);
         return sendError(res, "Registration failed", 500);
@@ -75,55 +76,30 @@ const login = async (req: Request, res: Response) => {
     try {
         const user = await User.findOne({ email });
         if (!user) {
-            return sendError(res, "Invalid email or password", 401);
+            return sendError(res, "Invalid email or password");
         }
 
-        const isMatch = await bcrypt.compare(password, user.password || "");
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return sendError(res, "Invalid email or password", 401);
+            return sendError(res, "Invalid email or password");
         }
 
-        // Generate JWT tokens
-        const tokens = generateToken(user._id ? user._id.toString() : "");
-
-        // Save refresh token to database (support multiple devices)
-        if (!user.refreshToken) {
-            user.refreshToken = [];
-        }
+        // generate JWT token
+        const tokens = generateToken(user._id.toString());
+        
+        // save refresh token to DB
         user.refreshToken.push(tokens.refreshToken);
         await user.save();
 
-        // Return tokens and user info
+        //send token back to user
         res.status(200).json({
-            _id: user._id,
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken
+            accessToken: tokens.token,
+            refreshToken: tokens.refreshToken,
+            _id: user._id
         });
 
     } catch (error) {
-        console.error("Login error:", error);
         return sendError(res, "Login failed", 500);
-    }
-};
-
-const logout = async (req: Request, res: Response) => {
-    const refreshToken = req.body.refreshToken;
-    if (!refreshToken) {
-        return sendError(res, "Refresh token is required", 400);
-    }
-
-    try {
-        const user = await User.findOne({ refreshToken: refreshToken });
-        if (user) {
-            user.refreshToken = user.refreshToken ? user.refreshToken.filter(t => t !== refreshToken) : [];
-            await user.save();
-            res.status(200).send("Logged out successfully");
-        } else {
-            // Even if user not found, we treat it as success (token invalid anyway)
-            res.status(200).send("Logged out successfully");
-        }
-    } catch (error) {
-        return sendError(res, "Logout failed", 500);
     }
 };
 
@@ -135,17 +111,33 @@ const refreshToken = async (req: Request, res: Response) => {
     }
 
     try {
-        const refreshSecret: string = process.env.JWT_REFRESH_SECRET || "refreshsecret";
-        
-        jwt.verify(refreshToken, refreshSecret, async (err: any, decoded: any) => {
-            if (err) {
-                return sendError(res, "Invalid refresh token", 403);
-            }
-            
-            const user = await User.findById(decoded._id);
-            if (!user) {
-                return sendError(res, "User not found", 403);
-            }
+        const secret: string = process.env.JWT_SECRET || "secretkey";
+        const decoded: any = jwt.verify(refreshToken, secret);
+    
+        const user = await User.findById(decoded._id);
+        if (!user) {
+            return sendError(res, "Invalid refresh token", 401);
+        }
+    
+        if (!user.refreshToken.includes(refreshToken)) {
+            //remove all refresh tokens from user
+            user.refreshToken = [];
+            await user.save();
+            return sendError(res, "Invalid refresh token", 401);
+        }
+    
+        //generate new tokens
+        const tokens = generateToken(user._id.toString());
+        user.refreshToken.push(tokens.refreshToken);
+        //remove old refresh token
+        user.refreshToken = user.refreshToken.filter((rt: any) => rt !== refreshToken);
+        await user.save();
+    
+        res.status(200).json(tokens);
+    } catch (error) {
+        return sendError(res, "Invalid refresh token", 401);
+    }
+};
 
             if (!user.refreshToken || !user.refreshToken.includes(refreshToken)) {
                 // Token reuse detected or invalid token -> clear all tokens for security

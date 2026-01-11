@@ -1,31 +1,21 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-// Interface definition for the User document
-export interface IUser {
-    email: string;
-    password?: string;
-    refreshToken?: string[]; // Array of strings for multiple device sessions
-    _id?: string;
-}
-
-// Mongoose Schema definition
-const userSchema = new mongoose.Schema<IUser>({
+const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique: true, // Ensures no two users have the same email
+        unique: true
     },
     password: {
         type: String,
-        required: true,
+        required: true
     },
     refreshToken: {
-        type: [String],
-        default: [], // Starts as an empty array
+        type: [String], // Array of refresh tokens
+        default: []
     }
 });
 
-// Create and export the Model
-const User = mongoose.model<IUser>('User', userSchema);
+const userModel = mongoose.model("User", userSchema);
 
-export default User;
+export default userModel;
