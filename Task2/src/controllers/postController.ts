@@ -46,24 +46,29 @@ class PostController extends baseController {
     }
 
     async getCommentsByPostId(req: AuthRequest, res: Response) {
-        const userId = (req as any).user?._id;
-        const post = await Post.findById(req.params.id);
-        if (post?.senderId.toString() !== userId) {
-            res.status(403).json({error: "Forbidden"});
-            return;
-        }
+            try {
+                const {postId} = req.params;
+                
+                if (!mongoose.isValidObjectId(postId)) {
+                    return res.status(400).json({error: 'Invalid postId'});
+                }
 
-        try {
-            const {postId} = req.params;
-            if (!mongoose.isValidObjectId(postId)) {
-                return res.status(400).json({error: 'Invalid postId'});
+                const post = await Post.findById(postId);
+                
+                if (!post) {
+                    return res.status(404).json({error: "Post not found"});
+                }
+                // Optional: Verify that the requesting user is the owner of the post before fetching comments
+                //     const userId = (req as any).user?._id;
+                // if (post.senderId.toString() !== userId) {
+                //     return res.status(403).json({error: "Forbidden"});
+                // }
+
+                const comments = await Comment.find({postId});
+                res.json(comments);
+            } catch (error) {
+                res.status(500).json({error: error instanceof Error ? error.message : 'An unknown error occurred'});
             }
-
-            const comments = await Comment.find({postId});
-            res.json(comments);
-        } catch (error) {
-            res.status(500).json({error: error instanceof Error ? error.message : 'An unknown error occurred'});
-        }
     }
 }
 

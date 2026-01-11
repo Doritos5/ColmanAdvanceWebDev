@@ -6,7 +6,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /comments:
+ * /comment:
  *   post:
  *     summary: Create a new comment
  *     description: Add a new comment to a specific post
@@ -41,7 +41,7 @@ router.post("/", authMiddleware, commentController.post.bind(commentController))
 
 /**
  * @swagger
- * /comments:
+ * /comment:
  *   get:
  *     summary: Get all comments
  *     description: Retrieve a list of all comments
@@ -54,7 +54,7 @@ router.get("/", commentController.get.bind(commentController));
 
 /**
  * @swagger
- * /comments/{id}:
+ * /comment/{id}:
  *   get:
  *     summary: Get a comment by ID
  *     description: Retrieve a specific comment by its ID
@@ -76,7 +76,7 @@ router.get("/:id", commentController.getById.bind(commentController));
 
 /**
  * @swagger
- * /comments/{id}:
+ * /comment/{id}:
  *   put:
  *     summary: Update a comment
  *     description: Modify the content of an existing comment
@@ -114,7 +114,7 @@ router.put("/:id", authMiddleware, commentController.put.bind(commentController)
 
 /**
  * @swagger
- * /comments/{id}:
+ * /comment/{id}:
  *   delete:
  *     summary: Delete a comment
  *     description: Remove a comment by its ID

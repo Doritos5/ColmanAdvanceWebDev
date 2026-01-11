@@ -2,17 +2,18 @@ import express, { Express } from "express";
 const app = express();
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cors from "cors";
 dotenv.config();
-console.log("doritos: ", process.env.NODE_ENV);
 import postRoutes from "./routes/postRoute";
 import commentRoutes from "./routes/commentRoutes";
 import authRoutes from "./routes/authRoutes";
 import { specs, swaggerUi } from "./swagger";
 
-const intApp = () => {
+const initApp = () => {
     const promise = new Promise<Express>((resolve, reject) => {
         app.use(express.urlencoded({ extended: false }));
         app.use(express.json());
+        app.use(cors());
 
         // Swagger Documentation
         app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs, {
@@ -31,6 +32,13 @@ const intApp = () => {
         app.use("/post", postRoutes);
         app.use("/auth", authRoutes);
 
+        // Middleware לטיפול בשגיאות - ידפיס את הבעיה האמיתית לטרמינל
+        app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+            console.error("🔥 Server Error:", err); // זה ידפיס את השגיאה באדום/בולט
+            res.status(500).json({ error: "Internal Server Error", details: err.message });
+        });
+        // ------------------------------------------------------------------------
+        
         const dbUri = process.env.MONGODB_URI;
         if (!dbUri) {
             console.error("MONGODB_URI is not defined in the environment variables.");
@@ -39,7 +47,15 @@ const intApp = () => {
             mongoose
                 .connect(dbUri, {})
                 .then(() => {
+                    console.log("Successfully connected to MongoDB");
                     resolve(app);
+                })
+                .catch((err) => {
+                    console.error("🔥🔥🔥 Database Connection Error 🔥🔥🔥");
+                    console.error("Could not connect to MongoDB. Please ensure MongoDB is running.");
+                    console.error("Connection string:", dbUri);
+                    console.error(err);
+                    reject(err);
                 });
         }
         const db = mongoose.connection;
@@ -53,4 +69,4 @@ const intApp = () => {
     return promise;
 };
 
-export default intApp;
+export default initApp;
