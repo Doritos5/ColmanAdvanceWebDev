@@ -24,18 +24,18 @@ import authController from "../controllers/authController";
  *             schema:
  *               type: object
  *               properties:
- *                 token:
+ *                 _id:
  *                   type: string
- *                   description: JWT access token
- *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
- *                 refreshToken:
+ *                   description: User ID
+ *                   example: "507f1f77bcf86cd799439011"
+ *                 email:
  *                   type: string
- *                   description: JWT refresh token
- *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
+ *                   description: User email
+ *                   example: "user@example.com"
  *       400:
  *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
@@ -63,7 +63,7 @@ router.post("/register", authController.register);
  *             schema:
  *               type: object
  *               properties:
- *                 token:
+ *                 accessToken:
  *                   type: string
  *                   description: JWT access token
  *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -71,6 +71,10 @@ router.post("/register", authController.register);
  *                   type: string
  *                   description: JWT refresh token
  *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 _id:
+ *                   type: string
+ *                   description: User ID
+ *                   example: "507f1f77bcf86cd799439011"
  *       400:
  *         $ref: '#/components/responses/ValidationError'
  *       401:
@@ -110,10 +114,10 @@ router.post("/login", authController.login);
  *                   type: string
  *                   description: New JWT refresh token
  *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
- *       401:
- *         $ref: '#/components/responses/UnauthorizedError'
  *       400:
  *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
