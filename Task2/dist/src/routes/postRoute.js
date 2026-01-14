@@ -1,16 +1,12 @@
-import express from 'express';
-import postController from '../controllers/postController';
-import authMiddleware from "../middleware/authMiddleware";
-
-const router = express.Router();
-
-/**
- * @swagger
- * tags:
- *   name: Posts
- *   description: The posts managing API
- */
-
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const postController_1 = __importDefault(require("../controllers/postController"));
+const authMiddleware_1 = __importDefault(require("../middleware/authMiddleware"));
+const router = express_1.default.Router();
 /**
  * @swagger
  * /post:
@@ -39,15 +35,12 @@ const router = express.Router();
  *     responses:
  *       201:
  *         description: Post created successfully
- *       400:
- *         description: Bad request
  *       401:
  *         description: Unauthorized
- *       403:
- *         description: Forbidden (Token valid but user not authorized)
+ *       400:
+ *         description: Bad request
  */
-router.post("/", authMiddleware, postController.post.bind(postController));
-
+router.post("/", authMiddleware_1.default, postController_1.default.post.bind(postController_1.default));
 /**
  * @swagger
  * /post:
@@ -59,8 +52,7 @@ router.post("/", authMiddleware, postController.post.bind(postController));
  *       200:
  *         description: List of posts
  */
-router.get('/', postController.get.bind(postController));
-
+router.get('/', postController_1.default.get.bind(postController_1.default));
 /**
  * @swagger
  * /post/{id}:
@@ -81,8 +73,7 @@ router.get('/', postController.get.bind(postController));
  *       404:
  *         description: Post not found
  */
-router.get('/:id', postController.getById.bind(postController));
-
+router.get('/:id', postController_1.default.getById.bind(postController_1.default));
 /**
  * @swagger
  * /post/{id}:
@@ -120,13 +111,10 @@ router.get('/:id', postController.getById.bind(postController));
  *         description: Post updated successfully
  *       401:
  *         description: Unauthorized
- *       403:
- *         description: Forbidden (Token valid but user not authorized)
  *       404:
  *         description: Post not found
  */
-router.put('/:id', authMiddleware, postController.put.bind(postController));
-
+router.put('/:id', authMiddleware_1.default, postController_1.default.put.bind(postController_1.default));
 /**
  * @swagger
  * /post/{id}:
@@ -144,17 +132,14 @@ router.put('/:id', authMiddleware, postController.put.bind(postController));
  *           type: string
  *         description: ID of the post
  *     responses:
- *       200:
+ *       204:
  *         description: Post deleted successfully
  *       401:
  *         description: Unauthorized
- *       403:
- *         description: Forbidden (Token valid but user not authorized)
  *       404:
  *         description: Post not found
  */
-router.delete('/:id', authMiddleware, postController.del.bind(postController));
-
+router.delete('/:id', authMiddleware_1.default, postController_1.default.del.bind(postController_1.default));
 /**
  * @swagger
  * /post/comments/{postId}:
@@ -175,6 +160,6 @@ router.delete('/:id', authMiddleware, postController.del.bind(postController));
  *       404:
  *         description: Post not found
  */
-router.get('/comments/:postId', postController.getCommentsByPostId.bind(postController));
-
-export default router;
+router.get('/comments/:postId', postController_1.default.getCommentsByPostId.bind(postController_1.default));
+exports.default = router;
+//# sourceMappingURL=postRoute.js.map

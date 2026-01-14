@@ -14,8 +14,8 @@ const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => 
     const secret: string = process.env.JWT_SECRET || "secretkey";
 
     try {
-        const decoded = jwt.verify(token, secret) as { userId: string };
-        req.user = { _id: decoded.userId };
+        const decoded = jwt.verify(token, secret) as { _id: string };
+        req.user = { _id: decoded._id };
         next();
     } catch (error) {
         return res.status(401).json({ error: "Unauthorized" });

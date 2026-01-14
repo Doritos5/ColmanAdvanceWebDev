@@ -1,12 +1,13 @@
-import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const port = process.env.PORT || 3000;
-
-const options: swaggerJsdoc.Options = {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.swaggerUi = exports.specs = void 0;
+const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
+const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+exports.swaggerUi = swagger_ui_express_1.default;
+const options = {
     definition: {
         openapi: "3.0.0",
         info: {
@@ -18,23 +19,9 @@ const options: swaggerJsdoc.Options = {
                 email: "developer@example.com",
             },
         },
-        tags: [
-            {
-                name: 'Authentication',
-                description: 'Authentication endpoints'
-            },
-            {
-                name: 'Posts',
-                description: 'The posts managing API'
-            },
-            {
-                name: 'Comments',
-                description: 'Comments endpoints'
-            }
-        ],
         servers: [
             {
-                url: `http://localhost:${port}`,
+                url: process.env.BASE_URL || "http://localhost:3000",
                 description: "Development server",
             },
         ],
@@ -68,32 +55,6 @@ const options: swaggerJsdoc.Options = {
                             minLength: 6,
                             description: "User password (hashed when stored)",
                             example: "password123",
-                        },
-                    },
-                },
-                Post: {
-                    type: "object",
-                    required: ["title", "content", "senderId"],
-                    properties: {
-                        _id: {
-                            type: "string",
-                            description: "Post unique identifier",
-                            example: "60d0fe4f5311236168a109ca",
-                        },
-                        title: {
-                            type: "string",
-                            description: "Title of the post",
-                            example: "My First Blog Post",
-                        },
-                        content: {
-                            type: "string",
-                            description: "Content of the post",
-                            example: "This is the content of the post...",
-                        },
-                        senderId: {
-                            type: "string",
-                            description: "The ID of the user who created the post",
-                            example: "60d0fe4f5311236168a109ca",
                         },
                     },
                 },
@@ -167,9 +128,8 @@ const options: swaggerJsdoc.Options = {
                             description: "JWT refresh token",
                             example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                         },
-                        _id: {
-                            type: "string",
-                            example: "507f1f77bcf86cd799439011",
+                        user: {
+                            $ref: "#/components/schemas/User",
                         },
                     },
                 },
@@ -293,7 +253,6 @@ const options: swaggerJsdoc.Options = {
         "./dist/src/controllers/*.js",
     ],
 };
-
-const specs = swaggerJsdoc(options);
-
-export { specs, swaggerUi };
+const specs = (0, swagger_jsdoc_1.default)(options);
+exports.specs = specs;
+//# sourceMappingURL=swagger.js.map

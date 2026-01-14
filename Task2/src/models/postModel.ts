@@ -1,5 +1,13 @@
-import mongoose from 'mongoose'
-const postSchema = new mongoose.Schema({
+import mongoose from 'mongoose';
+
+// Interface defining the structure of a Post document
+export interface IPost {
+    title: string;
+    content: string;
+    senderId: mongoose.Types.ObjectId; // Reference to a User ID
+}
+
+const postSchema = new mongoose.Schema<IPost>({
     title: {
         type: String,
         required: true
@@ -9,9 +17,12 @@ const postSchema = new mongoose.Schema({
         required: true
     },
     senderId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Establishes the relationship with the User model
         required: true
     }
 });
 
-export default mongoose.model('Post', postSchema);
+const Post = mongoose.model<IPost>('Post', postSchema);
+
+export default Post;
