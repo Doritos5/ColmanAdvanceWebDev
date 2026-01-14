@@ -43,9 +43,10 @@ class PostController extends baseController {
 
             // Delete all comments associated with the post
             await Comment.deleteMany({ postId: post._id });
-
-            // Call parent deletion method
-            return super.del(req, res);
+            
+            // Delete the post itself
+            await Post.findByIdAndDelete(postId);
+            res.status(200).json({ message: "Post deleted successfully" });
 
         } catch (error) {
             res.status(500).json({ error: "Internal Server Error" });
