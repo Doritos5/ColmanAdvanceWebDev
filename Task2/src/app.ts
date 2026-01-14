@@ -6,38 +6,42 @@ dotenv.config();
 import postRoutes from "./routes/postRoute";
 import commentRoutes from "./routes/commentRoutes";
 import authRoutes from "./routes/authRoutes";
-import userRoutes from "./routes/userRoutes";
 import { specs, swaggerUi } from "./swagger";
 
-const initApp = () => {
-    const promise = new Promise<Express>((resolve, reject) => {
+const initApp = (): Promise<Express> => {
+    return new Promise<Express>((resolve, reject) => {
+        const app = express();
+        
+        // Middleware setup
         app.use(express.urlencoded({ extended: false }));
         app.use(express.json());
         app.use(cors());
 
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+        // Swagger Documentation
+        app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs, {
+            explorer: true,
+            customCss: ".swagger-ui .topbar { display: none }",
+            customSiteTitle: "Posts & Comments API Documentation"
+        }));
 
-// Swagger Documentation
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs, {
-    explorer: true,
-    customCss: ".swagger-ui .topbar { display: none }",
-    customSiteTitle: "Posts & Comments API Documentation"
-}));
+        // Swagger JSON endpoint
+        app.get("/api-docs.json", (req, res) => {
+            res.setHeader("Content-Type", "application/json");
+            res.send(specs);
+        });
 
-// Swagger JSON endpoint
-app.get("/api-docs.json", (req, res) => {
-    res.setHeader("Content-Type", "application/json");
-    res.send(specs);
-});
+        // Routes
+        app.use("/comment", commentRoutes);
+        app.use("/post", postRoutes);
+        app.use("/auth", authRoutes);
 
-        // Middleware לטיפול בשגיאות - ידפיס את הבעיה האמיתית לטרמינל
+        // Middleware for error handling
         app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-            console.error("🔥 Server Error:", err); // זה ידפיס את השגיאה באדום/בולט
+            console.error("🔥 Server Error:", err);
             res.status(500).json({ error: "Internal Server Error", details: err.message });
         });
-        // ------------------------------------------------------------------------
-        
+
+        // Connect to MongoDB
         const dbUri = process.env.MONGODB_URI;
 
         if (!dbUri) {
@@ -57,6 +61,14 @@ app.get("/api-docs.json", (req, res) => {
                     reject(err);
                 });
         }
+        
+        const db = mongoose.connection;
+        db.on("error", (error) => {
+            console.error(error);
+        });
+        db.once("open", () => {
+            console.log("Connected to MongoDB");
+        });
     });
 };
 

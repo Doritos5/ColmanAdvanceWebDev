@@ -17,17 +17,17 @@ const generateToken = (userId: string): Tokens => {
     const refreshSecret: string = process.env.JWT_REFRESH_SECRET || "refreshsecret";
     const exp: number = parseInt(process.env.JWT_EXPIRES_IN || "3600"); // 1 hour
     const refreshexp: number = parseInt(process.env.JWT_REFRESH_EXPIRES_IN || "86400"); // 24 hours
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
         { _id: userId },
         secret,
         { expiresIn: exp }
     );
     const refreshToken = jwt.sign(
         { _id: userId },
-        secret,
+        refreshSecret,
         { expiresIn: refreshexp } // 24 hours
     );
-    return { accessToken, refreshToken };
+    return { accessToken: accessToken, refreshToken };
 }
 const register = async (req: Request, res: Response) => {
     // Registration logic here
@@ -93,7 +93,7 @@ const login = async (req: Request, res: Response) => {
 
         //send token back to user
         res.status(200).json({
-            accessToken: tokens.token,
+            accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
             _id: user._id
         });
@@ -111,8 +111,8 @@ const refreshToken = async (req: Request, res: Response) => {
     }
 
     try {
-        const secret: string = process.env.JWT_SECRET || "secretkey";
-        const decoded: any = jwt.verify(refreshToken, secret);
+        const refreshSecret: string = process.env.JWT_REFRESH_SECRET || "refreshsecret";
+        const decoded: any = jwt.verify(refreshToken, refreshSecret);
     
         const user = await User.findById(decoded._id);
         if (!user) {
@@ -139,35 +139,8 @@ const refreshToken = async (req: Request, res: Response) => {
     }
 };
 
-            if (!user.refreshToken || !user.refreshToken.includes(refreshToken)) {
-                // Token reuse detected or invalid token -> clear all tokens for security
-                user.refreshToken = [];
-                await user.save();
-                return sendError(res, "Invalid refresh token", 403);
-            }
-
-            // Generate new tokens
-            const newTokens = generateToken(user._id ? user._id.toString() : "");
-            
-            // Replace old refresh token with new one
-            user.refreshToken = user.refreshToken.filter(t => t !== refreshToken);
-            user.refreshToken.push(newTokens.refreshToken);
-            await user.save();
-
-            res.status(200).json({
-                accessToken: newTokens.accessToken,
-                refreshToken: newTokens.refreshToken
-            });
-        });
-
-    } catch (error) {
-        return sendError(res, "Refresh failed", 500);
-    }
-};
-
 export default {
     register,
     login,
-    logout,
     refreshToken
 };

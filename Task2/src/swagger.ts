@@ -18,20 +18,6 @@ const options: swaggerJsdoc.Options = {
                 email: "developer@example.com",
             },
         },
-        tags: [
-            {
-                name: 'Authentication',
-                description: 'Authentication endpoints'
-            },
-            {
-                name: 'Posts',
-                description: 'The posts managing API'
-            },
-            {
-                name: 'Comments',
-                description: 'Comments endpoints'
-            }
-        ],
         servers: [
             {                
                 url: process.env.BASE_URL || "http://localhost:3000",
