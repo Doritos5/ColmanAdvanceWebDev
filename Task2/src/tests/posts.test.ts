@@ -133,7 +133,7 @@ describe("Posts API Tests", () => {
             .set("Authorization", "Bearer " + accessToken);
         
         // Based on your postRoute, it returns 200 on success
-        expect(response.statusCode).toBe(204); 
+        expect(response.statusCode).toBe(200); 
     });
 
     // Test: Verify post is deleted
