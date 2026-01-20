@@ -116,4 +116,116 @@ describe("Comments API Tests", () => {
         const response = await request(app).get("/comment/" + commentId);
         expect(response.statusCode).toBe(404);
     });
+
+    // Test: Fail to create comment without authentication
+    test("Fail to create comment without auth", async () => {
+        const response = await request(app)
+            .post("/comment")
+            .send({
+                postId: postId,
+                content: testComment.content
+            });
+        expect(response.statusCode).toBe(401);
+    });
+
+    // Test: Fail to update comment without authentication
+    test("Fail to update comment without auth", async () => {
+        // Create a new comment
+        const createRes = await request(app)
+            .post("/comment")
+            .set("Authorization", "Bearer " + accessToken)
+            .send({
+                postId: postId,
+                content: "Comment to update"
+            });
+        const newCommentId = createRes.body._id;
+
+        const response = await request(app)
+            .put("/comment/" + newCommentId)
+            .send({ content: "Hacked comment" });
+        expect(response.statusCode).toBe(401);
+    });
+
+    // Test: Fail to update comment as different user
+    test("Fail to update comment as different user", async () => {
+        // Create a new user
+        const newUser = {
+            email: "other@comment.com",
+            password: "testpassword",
+            username: "othercommenter"
+        };
+        await request(app).post("/auth/register").send(newUser);
+        const loginRes = await request(app).post("/auth/login").send(newUser);
+        const otherToken = loginRes.body.accessToken;
+
+        // Create a comment as the first user
+        const createRes = await request(app)
+            .post("/comment")
+            .set("Authorization", "Bearer " + accessToken)
+            .send({
+                postId: postId,
+                content: "Original comment"
+            });
+        const newCommentId = createRes.body._id;
+
+        // Try to update with different user
+        const response = await request(app)
+            .put("/comment/" + newCommentId)
+            .set("Authorization", "Bearer " + otherToken)
+            .send({ content: "Hacked comment" });
+        expect(response.statusCode).toBe(403);
+    });
+
+    // Test: Fail to delete comment without authentication
+    test("Fail to delete comment without auth", async () => {
+        // Create a new comment
+        const createRes = await request(app)
+            .post("/comment")
+            .set("Authorization", "Bearer " + accessToken)
+            .send({
+                postId: postId,
+                content: "Comment to delete"
+            });
+        const newCommentId = createRes.body._id;
+
+        const response = await request(app)
+            .delete("/comment/" + newCommentId);
+        expect(response.statusCode).toBe(401);
+    });
+
+    // Test: Fail to delete comment as different user
+    test("Fail to delete comment as different user", async () => {
+        // Create a new user
+        const newUser = {
+            email: "deleter@comment.com",
+            password: "testpassword",
+            username: "deletingcommenter"
+        };
+        await request(app).post("/auth/register").send(newUser);
+        const loginRes = await request(app).post("/auth/login").send(newUser);
+        const otherToken = loginRes.body.accessToken;
+
+        // Create a comment as the first user
+        const createRes = await request(app)
+            .post("/comment")
+            .set("Authorization", "Bearer " + accessToken)
+            .send({
+                postId: postId,
+                content: "Comment to be deleted by wrong user"
+            });
+        const newCommentId = createRes.body._id;
+
+        // Try to delete with different user
+        const response = await request(app)
+            .delete("/comment/" + newCommentId)
+            .set("Authorization", "Bearer " + otherToken);
+        expect(response.statusCode).toBe(403);
+    });
+
+    // Test: Get non-existent comment
+    test("Get non-existent comment", async () => {
+        const fakeId = "654321654321654321654321";
+        const response = await request(app).get("/comment/" + fakeId);
+        expect(response.statusCode).toBe(404);
+    });
 });

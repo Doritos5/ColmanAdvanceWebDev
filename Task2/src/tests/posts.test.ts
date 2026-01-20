@@ -141,4 +141,113 @@ describe("Posts API Tests", () => {
         const response = await request(app).get("/post/" + postId);
         expect(response.statusCode).toBe(404);
     });
+
+    // Test: Fail to update post without authentication
+    test("Fail to update post without auth", async () => {
+        // Create a new post to update
+        const createRes = await request(app)
+            .post("/post")
+            .set("Authorization", "Bearer " + accessToken)
+            .send(testPost);
+        const newPostId = createRes.body._id;
+
+        const response = await request(app)
+            .put("/post/" + newPostId)
+            .send({ title: "Hacked Title" });
+        expect(response.statusCode).toBe(401);
+    });
+
+    // Test: Fail to update post as different user
+    test("Fail to update post as different user", async () => {
+        // Create a new user
+        const newUser = {
+            email: "other@user.com",
+            password: "testpassword",
+            username: "otheruser"
+        };
+        await request(app).post("/auth/register").send(newUser);
+        const loginRes = await request(app).post("/auth/login").send(newUser);
+        const otherToken = loginRes.body.accessToken;
+
+        // Create a post as the first user
+        const createRes = await request(app)
+            .post("/post")
+            .set("Authorization", "Bearer " + accessToken)
+            .send(testPost);
+        const newPostId = createRes.body._id;
+
+        // Try to update with different user
+        const response = await request(app)
+            .put("/post/" + newPostId)
+            .set("Authorization", "Bearer " + otherToken)
+            .send({ title: "Hacked Title" });
+        expect(response.statusCode).toBe(403);
+    });
+
+    // Test: Fail to delete post without authentication
+    test("Fail to delete post without auth", async () => {
+        // Create a new post to delete
+        const createRes = await request(app)
+            .post("/post")
+            .set("Authorization", "Bearer " + accessToken)
+            .send(testPost);
+        const newPostId = createRes.body._id;
+
+        const response = await request(app)
+            .delete("/post/" + newPostId);
+        expect(response.statusCode).toBe(401);
+    });
+
+    // Test: Fail to delete post as different user
+    test("Fail to delete post as different user", async () => {
+        // Create a new user
+        const newUser = {
+            email: "deleter@user.com",
+            password: "testpassword",
+            username: "deleteruser"
+        };
+        await request(app).post("/auth/register").send(newUser);
+        const loginRes = await request(app).post("/auth/login").send(newUser);
+        const otherToken = loginRes.body.accessToken;
+
+        // Create a post as the first user
+        const createRes = await request(app)
+            .post("/post")
+            .set("Authorization", "Bearer " + accessToken)
+            .send(testPost);
+        const newPostId = createRes.body._id;
+
+        // Try to delete with different user
+        const response = await request(app)
+            .delete("/post/" + newPostId)
+            .set("Authorization", "Bearer " + otherToken);
+        expect(response.statusCode).toBe(403);
+    });
+
+    // Test: Delete non-existent post
+    test("Delete non-existent post", async () => {
+        const fakeId = "654321654321654321654321";
+        const response = await request(app)
+            .delete("/post/" + fakeId)
+            .set("Authorization", "Bearer " + accessToken);
+        expect(response.statusCode).toBe(404);
+    });
+
+    // Test: Get comments with invalid post ID
+    test("Get comments with invalid post ID", async () => {
+        const invalidId = "invalid-id";
+        const response = await request(app)
+            .get("/post/comments/" + invalidId)
+            .set("Authorization", "Bearer " + accessToken);
+        expect(response.statusCode).toBe(400);
+    });
+
+    // Test: Get comments from non-existent post
+    test("Get comments from non-existent post", async () => {
+        const fakeId = "654321654321654321654321";
+        const response = await request(app)
+            .get("/post/comments/" + fakeId)
+            .set("Authorization", "Bearer " + accessToken);
+        expect(response.statusCode).toBe(404);
+    });
 });
