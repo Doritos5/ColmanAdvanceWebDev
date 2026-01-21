@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
+    "target": "es2016",
     "module": "commonjs",
-    "esModuleInterop": true,
-    "target": "es6",
+    "rootDir": "./src",
     "moduleResolution": "node",
-    "sourceMap": true,
-    "outDir": "dist",
-    "rootDir": "./", 
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "task2/src/**/*", "tsconfig.json"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules"]
 }

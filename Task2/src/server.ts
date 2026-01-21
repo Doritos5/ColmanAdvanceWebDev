@@ -1,24 +1,15 @@
-import app, { initApp } from "./app";
+import initApp from "./app";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-/**
- * Start the server ONLY if we are not in test mode.
- * Jest sets NODE_ENV to 'test' automatically.
- */
-if (process.env.NODE_ENV !== "test") {
-    initApp().then((app) => {
-        // Start listening only after DB connection is established
-        app.listen(port, () => {
-            console.log(`Server is running on http://localhost:${port}`);
-        });
-    }).catch((err) => {
-        console.error("Error initializing app:", err);
+initApp().then((app) => {
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
     });
-}
+});
 
 // Export initApp to satisfy any external requirements
 export default initApp;
